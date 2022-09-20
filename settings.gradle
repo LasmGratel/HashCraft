@@ -1,0 +1,3 @@
+rootProject.name = "HashCraft"
+
+include 'HashCraft-Mixin', 'HashCraft-Integration', 'HashCraft-Benchmark'

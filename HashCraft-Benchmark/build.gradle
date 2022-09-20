@@ -2,13 +2,19 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url = "https://maven.minecraftforge.net/" }
+        maven {
+            name = "gradle"
+            url = "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
     }
 }
 
 apply plugin: "net.minecraftforge.gradle"
+apply plugin: "com.github.johnrengelman.shadow"
 
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
@@ -18,12 +24,16 @@ group= mod_group // http://maven.apache.org/guides/mini/guide-naming-conventions
 archivesBaseName = mod_id
 
 repositories {
-	mavenCentral()
+    mavenCentral()
+    maven {
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven"
+    }
 }
 
 minecraft {
     mappings channel: 'stable', version: '39-1.12'
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
@@ -56,7 +66,17 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2859'
 
+    implementation rootProject
+
+    compileOnly 'org.openjdk.jmh:jmh-core:1.35'
+    implementation fg.deobf("mezz.jei:jei_1.12.2:4.16.1.302")
+    //compileOnly "mezz.jei:jei_1.12.2:4.16.1.302:api"
+
     annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.1'
+    annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.35'
+
+    shadow 'org.openjdk.jmh:jmh-core:1.35'
+
 }
 
 configure([tasks.compileJava]) {
@@ -81,17 +101,24 @@ configure([tasks.compileJava]) {
     }
 }
 
-jar {
-    manifest {
-        attributes([
-            "FMLAT": "accesstransformer.cfg"
-        ])
+jar.finalizedBy('reobfJar')
+
+reobf {
+    shadowJar {
+        dependsOn tasks.createMcpToSrg
+        mappings = tasks.createMcpToSrg.outputs.files.singleFile
     }
 }
 
+artifacts {
+    archives tasks.shadowJar
+}
 
-jar.finalizedBy('reobfJar')
-
+shadowJar {
+    configurations = [project.configurations.shadow]
+    relocate 'org.apache.commons.math3', 'caonima.shabilaunchwrapper'
+    mergeServiceFiles()
+}
 
 processResources
 {

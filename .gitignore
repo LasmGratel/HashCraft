@@ -5,15 +5,15 @@
 !gradle/
 !gradlew
 !gradlew.bat
-!build.gradle
-!gradle.properties
+!**/build.gradle
+!**/gradle.properties
 
 # include markdowns
 !README.md
 !LICENSE
 
 # include source code
-!src/
+!*/src/
 !libs/
 !img/
 !RedstoneFlux-API
@@ -29,3 +29,5 @@
 !scripts/
 !docs/
 !logo.png
+
+!settings.gradle

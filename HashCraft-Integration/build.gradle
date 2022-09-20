@@ -18,12 +18,14 @@ group= mod_group // http://maven.apache.org/guides/mini/guide-naming-conventions
 archivesBaseName = mod_id
 
 repositories {
-	mavenCentral()
+    mavenCentral()
+    maven {
+        url "https://maven.cleanroommc.com"
+    }
 }
 
 minecraft {
     mappings channel: 'stable', version: '39-1.12'
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
@@ -56,6 +58,9 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2859'
 
+    implementation rootProject
+    implementation fg.deobf("zone.rong:mixinbooter:5.0")
+
     annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.1'
 }
 
@@ -80,15 +85,6 @@ configure([tasks.compileJava]) {
         }
     }
 }
-
-jar {
-    manifest {
-        attributes([
-            "FMLAT": "accesstransformer.cfg"
-        ])
-    }
-}
-
 
 jar.finalizedBy('reobfJar')
 
